@@ -491,16 +491,16 @@ Mostra la mitjana d'amount per IBAN de les targetes de crèdit a la companyia Do
 
 */
 
-USE transactions_star;
+USE star;
 
 
-SELECT cc.iban, ROUND(AVG(t.amount),2) AS "mitjana d'amount"  FROM transactions t
+SELECT cc.iban, ROUND(AVG(t.amount),2) AS "media de amount" FROM transactions t
 JOIN credit_cards cc
 ON t.card_id = cc.id
 JOIN companies c
 ON c.company_id = t.business_id
 
-WHERE c.company_name = 'Donec Ltd'
+WHERE c.company_name = 'Donec Ltd' AND declined = 0
 
 GROUP BY cc.iban;
 
@@ -517,14 +517,16 @@ Mostra la data de cada transacció juntament amb el total de les vendes.
 
 */
 
-USE transactions_star;
+USE star;
 
 
-SELECT DATE(t.`timestamp`) AS 'dies', ROUND(SUM(t.amount),2) 'total de les vendes' FROM transactions t
+SELECT DATE(t.`timestamp`) AS 'fechas', ROUND(SUM(t.amount),2) 'total de las ventas' FROM transactions t
+
+WHERE t.declined = 0 
 
 GROUP BY DATE(t.`timestamp`)
 
-ORDER BY SUM(t.amount) DESC
+ORDER BY 'total de las ventas' DESC
 LIMIT 5;
 
 
@@ -541,18 +543,19 @@ Ordena els resultats de major a menor quantitat.
 
 */
 
-USE transactions_star;
+USE star;
 
 
-SELECT c.company_name AS 'empreses', c.phone AS 'telèfon', c.country AS 'país', DATE(t.`timestamp`) AS 'data', t.amount AS 'amount'
+SELECT c.company_name AS 'empresas', c.phone AS 'teléfono', c.country AS 'país', DATE(t.`timestamp`) AS 'fecha', t.amount AS 'monto'
 FROM companies c
 JOIN transactions t
 ON t.business_id = c.company_id
 
 WHERE (t.amount BETWEEN 350 AND 400) AND
-DATE(t.`timestamp`) IN ('2015-04-29', '2018-07-20', '2024-03-13')
+DATE(t.`timestamp`) IN ('2015-04-29', '2018-07-20', '2024-03-13') AND
+t.declined = 0
 
-ORDER BY ROUND('amount',2) DESC;
+ORDER BY 'monto' DESC;
 
 
 
@@ -569,12 +572,12 @@ si tenen igual o més de 400 transaccions o menys.
 
 */
 
-USE transactions_star;
+USE star;
 
-SELECT c.company_name AS 'empreses', COUNT(t.id) AS 'quantitat de transaccions',
+SELECT c.company_name AS 'empresas', COUNT(t.id) AS 'cantidad de transacciones',
 CASE
-  WHEN COUNT(t.id) >= 400 THEN 'Igual o Més de 400 transaccions'
-  ELSE 'Menys de 400 transaccions'
+  WHEN COUNT(t.id) >= 400 THEN 'Igual o Más de 400 transacciones'
+  ELSE 'Menos de 400 transacciones'
 END AS Categoria
 
 FROM transactions t
@@ -596,7 +599,7 @@ Elimina de la taula transaction el registre amb ID 000447FE-B650-4DCF-85DE-C7ED0
 
 */
 
-USE transactions_star;
+USE star;
 
 # Verificar que el registro existe
 SELECT * FROM transactions WHERE id = '000447FE-B650-4DCF-85DE-C7ED0EE1CAAD';
@@ -623,31 +626,30 @@ Presenta la vista creada, ordenant les dades de major a menor mitjana de compra.
 
 */
 
-USE transactions_star;
+USE star;
 
 DROP VIEW IF EXISTS VistaMarketing;
 
 CREATE VIEW VistaMarketing AS
 
 SELECT
-    c.company_name AS 'Nom de la companyia',
-    c.phone AS 'Telèfon de contacte',
-    c.country AS 'País de residència',
-    ROUND(AVG(t.amount),2) AS 'Mitjana de compra'
+    c.company_name AS 'Nombre de la compañía',
+    c.phone AS 'Teléfono de contacto',
+    c.country AS 'País de residencia',
+    ROUND(AVG(t.amount),2) AS 'Media de compra'
 
 FROM companies c
 
 JOIN transactions t
 ON c.company_id = t.business_id
 
-GROUP BY
-    c.company_name,
-    c.phone,
-    c.country;
+WHERE t.declined = 0
+
+GROUP BY c.company_id, c.company_name, c.phone, c.country;
     
     /* Mostrar la vista */
 
 SELECT *
 FROM VistaMarketing
 
-ORDER BY 'Mitjana de compra' DESC;
+ORDER BY 'Media de compra' DESC;
