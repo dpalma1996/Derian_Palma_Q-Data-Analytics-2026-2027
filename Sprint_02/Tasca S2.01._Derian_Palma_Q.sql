@@ -718,3 +718,104 @@ SELECT
     COUNT(*) AS 'tarjetas_activas'
 FROM estado_tarjetas et
 WHERE et.estado = 'Activa';
+
+
+
+
+/*
+
+
+Nivell 3
+Exercici 2
+
+Crea una taula amb la qual puguem unir les dades de l'arxiu de products.csv amb la base de dades creada 
+(ja que fins ara no podíem fer-ho), tenint en compte que des de transaction tens product_ids. Genera la següent consulta:
+
+👉 Necessitem conèixer el nombre de vegades que s'ha venut cada producte.
+
+*/
+
+USE star;
+
+DROP TABLE IF EXISTS products;
+
+CREATE TABLE products (
+    id INT NOT NULL,
+    product_name VARCHAR(255),
+    price DECIMAL(10, 2),
+    colour VARCHAR(20),
+    weight DECIMAL(6, 2),
+    warehouse_id VARCHAR(20),
+    category VARCHAR(100),
+    brand VARCHAR(100),
+    cost DECIMAL(10, 2),
+    launch_date DATE,
+    CONSTRAINT pk_products
+        PRIMARY KEY (id)
+);
+
+DROP TABLE IF EXISTS transaction_products;
+
+CREATE TABLE transaction_products (
+    transaction_id VARCHAR(255) NOT NULL,
+    product_position INT NOT NULL,
+    product_id INT NOT NULL,
+
+    CONSTRAINT pk_transaction_products
+        PRIMARY KEY (
+            transaction_id,
+            product_position
+        ),
+
+    CONSTRAINT fk_transaction_products_transaction
+        FOREIGN KEY (transaction_id)
+        REFERENCES transactions(id),
+
+    CONSTRAINT fk_transaction_products_product
+        FOREIGN KEY (product_id)
+        REFERENCES products(id)
+);
+
+INSERT INTO transaction_products (
+    transaction_id,
+    product_position,
+    product_id
+)
+SELECT
+    t.id AS transaction_id,
+    jt.product_position,
+    jt.product_id
+FROM transactions AS t
+CROSS JOIN JSON_TABLE(
+    CONCAT('[', t.product_ids, ']'),
+    '$[*]' COLUMNS (
+        product_position FOR ORDINALITY,
+        product_id INT PATH '$'
+    )
+) AS jt
+WHERE t.product_ids IS NOT NULL
+  AND TRIM(t.product_ids) <> '';
+  
+SELECT *
+FROM transaction_products;
+
+
+
+	### 👉 Necessitem conèixer el nombre de vegades que s'ha venut cada producte.
+
+
+
+SELECT
+    p.id AS producto_id,
+    p.product_name AS producto,
+    COUNT(t.id) AS veces_vendido
+FROM products AS p
+LEFT JOIN transaction_products AS tp
+    ON p.id = tp.product_id
+LEFT JOIN transactions AS t
+    ON tp.transaction_id = t.id
+   AND t.declined = 0
+GROUP BY
+    p.id,
+    p.product_name
+ORDER BY veces_vendido DESC;
