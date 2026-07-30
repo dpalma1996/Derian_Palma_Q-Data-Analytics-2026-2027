@@ -706,6 +706,10 @@ LEFT JOIN (
     
     
     
+SELECT * FROM star.estado_tarjetas;
+    
+    
+    
     ### 👉 Quantes targetes estan actives?
 
 USE star;
