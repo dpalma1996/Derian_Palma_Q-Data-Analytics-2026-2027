@@ -653,3 +653,64 @@ SELECT *
 FROM VistaMarketing
 
 ORDER BY 'Media de compra' DESC;
+
+
+
+
+/*
+
+Nivell 3
+Exercici 1
+
+Crea una nova taula que reflecteixi l'estat de les targetes de crèdit basat en si les tres últimes transaccions 
+han estat declinades aleshores és inactiu, si almenys una no és rebutjada aleshores és actiu. Partint d’aquesta taula respon:
+
+👉 Quantes targetes estan actives?
+
+*/
+
+USE star;
+
+DROP TABLE IF EXISTS estado_tarjetas;
+
+CREATE TABLE estado_tarjetas AS
+
+SELECT
+    cc.id AS tarjeta_id,
+    CASE
+        WHEN rt.transacciones_comprobadas = 3
+             AND rt.transacciones_rechazadas = 3
+            THEN 'Inactiva'
+        ELSE 'Activa'
+    END AS estado
+FROM credit_cards AS cc
+LEFT JOIN (
+    SELECT
+        ultimas.card_id,
+        COUNT(*) AS transacciones_comprobadas,
+        SUM(ultimas.declined) AS transacciones_rechazadas
+    FROM (
+        SELECT
+            t.card_id,
+            t.declined,
+            ROW_NUMBER() OVER (
+                PARTITION BY t.card_id
+                ORDER BY t.`timestamp` DESC, t.id DESC
+            ) AS numero_transaccion
+        FROM transactions AS t
+    ) AS ultimas
+    WHERE ultimas.numero_transaccion <= 3
+    GROUP BY ultimas.card_id
+) AS rt
+    ON cc.id = rt.card_id;
+    
+    
+    
+    ### 👉 Quantes targetes estan actives?
+
+USE star;
+
+SELECT
+    COUNT(*) AS 'tarjetas_activas'
+FROM estado_tarjetas et
+WHERE et.estado = 'Activa';
