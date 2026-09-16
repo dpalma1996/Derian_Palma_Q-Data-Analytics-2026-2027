@@ -41,9 +41,22 @@ CREATE OR REPLACE TABLE
     `sprint3-analytics-derian-palma.sprint3_gold.fact_transactions_optimized`
 PARTITION BY DATE(timestamp)
 CLUSTER BY business_id
+AS-- ### Crear la tabla Gold conservando los datos y las fechas originales.
+CREATE OR REPLACE TABLE
+  `sprint3-analytics-derian-palma.sprint3_gold.fact_transactions_optimized`
+PARTITION BY DATE(timestamp)
+CLUSTER BY business_id
 AS
 SELECT *
-FROM `sprint3-analytics-derian-palma.sprint3_silver.transactions_recent`;
+FROM `sprint3-analytics-derian-palma.sprint3_silver.transactions_clean`;
+
+
+-- ### Eliminar la caducidad de las particiones para conservar el histórico.
+ALTER TABLE
+  `sprint3-analytics-derian-palma.sprint3_gold.fact_transactions_optimized`
+SET OPTIONS (
+  partition_expiration_days = NULL
+);
 
 
 /*
