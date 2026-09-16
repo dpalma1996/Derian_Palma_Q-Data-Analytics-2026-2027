@@ -95,7 +95,7 @@ WITH Primeres_Compres AS (
             PARTITION BY user_id
             ORDER BY timestamp, transaction_id
         ) AS ordre_compra
-    FROM `sprint3-analytics-derian-palma.sprint3_silver.transactions_clean`
+    FROM `sprint3-analytics-derian-palma.sprint3_gold.fact_transactions_optimized`
     WHERE declined = 0
     QUALIFY ordre_compra <= 3
 ),
@@ -103,7 +103,9 @@ Resum_Compres AS (
     SELECT
         user_id,
         MAX(IF(ordre_compra = 3, timestamp, NULL)) AS data_tercera_compra,
-        MAX(IF(ordre_compra = 3, amount, NULL)) AS import_tercera_compra,
+        ROUND(
+            MAX(IF(ordre_compra = 3, amount, NULL)), 2
+        ) AS import_tercera_compra,
         ROUND(AVG(amount), 2) AS mitjana_3_primeres
     FROM Primeres_Compres
     GROUP BY user_id
