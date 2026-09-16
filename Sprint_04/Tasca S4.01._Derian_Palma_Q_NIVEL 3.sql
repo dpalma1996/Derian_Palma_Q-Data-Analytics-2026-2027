@@ -17,7 +17,7 @@ SELECT
     product_id AS product_sku,
     p.name AS product_name,
     p.price AS product_price
-FROM `sprint3-analytics-derian-palma.sprint3_silver.transactions_clean` AS t
+FROM `sprint3-analytics-derian-palma.sprint3_gold.fact_transactions_optimized` AS t
 CROSS JOIN UNNEST(t.product_ids) AS product_id
 JOIN `sprint3-analytics-derian-palma.sprint3_silver.products_clean` AS p
     ON product_id = p.product_id
