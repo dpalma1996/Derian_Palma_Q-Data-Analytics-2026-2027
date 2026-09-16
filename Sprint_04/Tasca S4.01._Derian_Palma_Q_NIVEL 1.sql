@@ -63,15 +63,17 @@ SET OPTIONS (
 EJERCICIO 3
 */
 
--- ### Consultar los últimos 30 días en la tabla sin particionar.
+-- ### Consultar 30 días del histórico en la tabla sin particionar.
 SELECT *
-FROM `sprint3-analytics-derian-palma.sprint3_silver.transactions_recent`
-WHERE timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY);
+FROM `sprint3-analytics-derian-palma.sprint3_silver.transactions_clean`
+WHERE timestamp >= TIMESTAMP('2024-12-02 00:00:00 UTC')
+  AND timestamp < TIMESTAMP('2025-01-01 00:00:00 UTC');
 
--- ### Aplicar el mismo filtro en la tabla optimizada.
+-- ### Consultar el mismo periodo en la tabla optimizada.
 SELECT *
 FROM `sprint3-analytics-derian-palma.sprint3_gold.fact_transactions_optimized`
-WHERE timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY);
+WHERE timestamp >= TIMESTAMP('2024-12-02 00:00:00 UTC')
+  AND timestamp < TIMESTAMP('2025-01-01 00:00:00 UTC');
 
 
 /*
@@ -92,6 +94,6 @@ GROUP BY fecha;
 -- ### Comprobar las ventas diarias y los bytes procesados.
 SELECT
     fecha,
-    ventas_totales
+    ROUND(ventas_totales,2) AS ventas_totales
 FROM `sprint3-analytics-derian-palma.sprint3_gold.mv_daily_sales`
 ORDER BY fecha;
