@@ -1,3 +1,3 @@
 # Sprint 4 - SQL
 
-Entrega correspondiente al Sprint 2 de IT Academy.
+Entrega correspondiente al Sprint 4 de IT Academy.
