@@ -1,0 +1,103 @@
+NovaFab Components | data_dictionary.txt
+==============================================================================
+Synthetic assessment data; not a record of real operations.
+Production and maintenance during 2025. Production intervals are fully contained in that year.
+
+SCOPE AND CONVENTIONS
+- runtime_hours is active production time. downtime_minutes is unplanned time within the lot and is additional to runtime. The lot ends after both intervals have elapsed.
+- shift is the shift at the start: Morning 06:00-14:00, Evening 14:00-22:00, Night 22:00-06:00. A lot may continue into the next shift.
+- maintenance_date includes an exact start time; duration_hours is the intervention duration. Maintenance is separate from production-lot intervals.
+- units_inspected is a sample, not total output. defective_units counts defective sampled units; defect_severity is the highest observed severity, or None if no defects were found.
+- target_cycle_min is minutes per unit. rated_units_hour is nominal reference output, not a hard limit for every product. Complexity is ordered Low, Medium, High; severity is None, Minor, Major, Critical.
+
+FORMAT
+CSV files use UTF-8 and comma delimiters. A few formatting inconsistencies are intentional. Investigate unusual values before removing them. Consult the data dictionary and relational model.
+Identifiers are text. Blank values are reserved for optional links or open end dates. Slash dates follow day/month/year. Decimal commas are quoted CSV fields.
+
+machines.csv
+------------------------------------------------------------------------------
+One individual machine.
+PK: machine_id
+  machine_id [text; PK]
+    Unique record identifier.
+  production_line [nominal; -]
+    Assigned production line.
+  installation_year [integer; -]
+    Year the machine entered operation.
+  rated_units_hour [decimal; -]
+    Nominal units per active hour, a reference rather than a universal hard ceiling.
+
+products.csv
+------------------------------------------------------------------------------
+One product and its target cycle.
+PK: product_id
+  product_id [text; PK]
+    Unique record identifier.
+  product_family [nominal; -]
+    Product family.
+  complexity_level [ordinal; -]
+    Ordinal product complexity.
+    Low < Medium < High
+  target_cycle_min [decimal; -]
+    Target active processing minutes per unit.
+
+production_runs.csv
+------------------------------------------------------------------------------
+One production lot on one machine.
+PK: run_id
+  run_id [text; PK]
+    Unique record identifier.
+  machine_id [text; FK]
+    Reference to machines.machine_id.
+  product_id [text; FK]
+    Reference to products.product_id.
+  start_datetime [datetime; -]
+    Start of the production lot.
+  shift [nominal; -]
+    Shift at lot start; a long lot can cross a shift boundary.
+  units_produced [integer; -]
+    Total units produced, including units later found defective.
+  runtime_hours [decimal; -]
+    Active running hours, excluding the recorded downtime.
+  downtime_minutes [decimal; -]
+    Unplanned idle minutes within the lot, in addition to runtime.
+
+quality_checks.csv
+------------------------------------------------------------------------------
+The single inspection summary for that lot.
+PK: run_id
+  run_id [text; PK/FK]
+    Reference to production_runs.run_id.
+  units_inspected [integer; -]
+    Number of sampled units inspected from the lot.
+  defective_units [integer; -]
+    Defective units found in the inspected sample.
+  defect_severity [ordinal; -]
+    Highest severity observed in the sample; None if no defects.
+    None < Minor < Major < Critical
+
+maintenance.csv
+------------------------------------------------------------------------------
+One intervention on one machine.
+PK: maintenance_id
+  maintenance_id [text; PK]
+    Unique record identifier.
+  machine_id [text; FK]
+    Reference to machines.machine_id.
+  maintenance_date [datetime; -]
+    Exact intervention start date and time.
+  maintenance_type [nominal; -]
+    Preventive or Corrective intervention.
+  duration_hours [decimal; -]
+    Elapsed intervention time in hours.
+  maintenance_cost_eur [decimal; -]
+    Recorded intervention cost in euros.
+
+RELATIONAL MODEL
+machines.machine_id (1)  --  (0..N) production_runs.machine_id
+products.product_id (1)  --  (0..N) production_runs.product_id
+production_runs.run_id (1)  --  (1) quality_checks.run_id
+machines.machine_id (1)  --  (0..N) maintenance.machine_id
+
+PK: primary key. FK: foreign key. UQ: unique value. FK?: may be blank.
+0..N: zero or more records. Types describe cleaned values.

@@ -1,0 +1,31 @@
+product_id,product_family,complexity_level,target_cycle_min
+P001,Standard,Low,0.79
+P002,Precision,High,1.35
+P003,Precision,Medium,1.5
+P004,Custom,High,1.57
+P005,Precision,Medium,1.21
+P006,Precision,High,1.5
+P007,Reinforced,Medium,0.78
+P008,Standard ,Low,0.72
+P009,Precision,Medium,1.49
+P010,Reinforced ,Medium,0.97
+P011,Reinforced,Medium,0.76
+P012,Standard,Low,0.69
+P013,Reinforced,High,1.03
+P014,Precision,Medium,1.25
+P015,standard,Low,0.75
+P016,reinforced,Medium,0.88
+P017,Custom,High,1.93
+P018,reinforced,Medium,1.05
+P019,Standard,Low,0.78
+P020,Precision,High,1.66
+P021,Standard,Medium,0.85
+P022,Standard,Medium,0.65
+P023,Custom,High,2.08
+P024,Standard,Medium,0.63
+P025,Custom,High,1.56
+P026,Standard,Low,0.76
+P027,Reinforced,High,0.65
+P028,Standard,Low,0.72
+P029,Custom ,High,2.05
+P030,Precision,Medium,1.36
